@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Preferences - Memory Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <div class="preferences-container">
+        <h1>Preferences</h1>
+        <form id="preferences-form">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="image-api">Favorite Image API:</label>
+                <select id="image-api">
+                    <option value="cataas">Cat as a Service</option>
+                    <option value="placekitten">Place Kitten</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="matched-color">Matched Cards Color:</label>
+                <input type="color" id="matched-color">
+            </div>
+            <div class="form-group">
+                <label for="card-back-color">Card Back Color:</label>
+                <input type="color" id="card-back-color">
+            </div>
+            <button type="submit">Save Preferences</button>
+        </form>
+        <a href="index.html" class="back-link">Back to Game</a>
+    </div>
+    <script type="module" src="../scripts/preferences.js"></script>
+</body>
+</html> 

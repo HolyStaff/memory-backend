@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>This shit is Bananas! 🍌</title>
+    <script type="module" src="../scripts/index.js"></script>
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+<h1>Memory</h1>
+<div class="game-container">
+    <div class="game">
+        <div class="controls">
+            <button id="start-button" class="game-button">Start Game</button>
+            <button id="reset-button" class="game-button">Reset Game</button>
+            <div class="color-picker-container">
+                <label for="card-color">Card Back Color:</label>
+                <input type="color" id="card-color" value="#3498db">
+            </div>
+            <div class="board-size-container">
+                <label for="board-size">Board Size:</label>
+                <select id="board-size" class="game-button">
+                    <option value="4" selected>4x4</option>
+                    <option value="6">6x6</option>
+                </select>
+            </div>
+        </div>
+        <div id="timer-container" class="timer-container">
+            <span>Flip Timer: </span>
+            <span id="flip-timer">0</span>
+            <span> seconds</span>
+        </div>
+        <div id="grid-container" class="grid-container">
+        </div>
+    </div>
+    
+    <div class="leaderboard-container">
+        <h2>Leaderboard</h2>
+        <div class="leaderboard-tabs">
+            <button class="tab-button active" data-size="4">4x4</button>
+            <button class="tab-button" data-size="6">6x6</button>
+        </div>
+        <div class="leaderboard-content">
+            <div class="leaderboard-list" id="leaderboard-4x4">
+                <div class="leaderboard-header">
+                    <span>Rank</span>
+                    <span>Moves</span>
+                    <span>Time</span>
+                </div>
+                <div class="leaderboard-entries">
+                    <!-- Entries will be added dynamically -->
+                </div>
+            </div>
+            <div class="leaderboard-list" id="leaderboard-6x6" style="display: none;">
+                <div class="leaderboard-header">
+                    <span>Rank</span>
+                    <span>Moves</span>
+                    <span>Time</span>
+                </div>
+                <div class="leaderboard-entries">
+                    <!-- Entries will be added dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
