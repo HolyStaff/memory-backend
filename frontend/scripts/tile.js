@@ -1,11 +1,12 @@
 class Tile {
-    constructor(id, imageUrl, onClickCallback) {
+    constructor(id, imageUrl, onClickCallback, matchedColor = '#2ecc71') {
         this.id = id;
         this.imageUrl = imageUrl;
         this.state = 'hidden'; // hidden, flipped, matched
         this.element = null;
         this.onClickCallback = onClickCallback;
         this.backFace = null; // Store reference to back face
+        this.matchedColor = matchedColor;
     }
 
     createElement() {
@@ -67,6 +68,13 @@ class Tile {
     match() {
         this.state = 'matched';
         this.element.classList.add('matched');
+        
+        // Apply custom matched color
+        const frontFace = this.element.querySelector('.tile-front');
+        if (frontFace) {
+            frontFace.style.backgroundColor = this.matchedColor;
+            frontFace.style.border = `2px solid ${this.matchedColor}`;
+        }
     }
 }
 

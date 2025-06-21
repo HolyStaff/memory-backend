@@ -18,10 +18,12 @@ class MemoryGame {
         this.matchCount = 0;
         this.flipDuration = 1000;
         this.gameStarted = false;
+        this.selectedApi = 'cats';
 
         this.board = new Board(this.boardSize, this.container, this.handleTileClick.bind(this));
 
         this.setupEventListeners();
+        this.loadUserPreferences();
     }
 
     setupEventListeners() {
@@ -29,6 +31,40 @@ class MemoryGame {
         this.ui.onResetButtonClick(() => this.resetGame());
         this.ui.onColorChange((color) => this.changeCardColor(color));
         this.ui.onBoardSizeChange((newSize) => this.handleBoardSizeChange(newSize));
+        this.ui.onApiChange((api) => this.handleApiChange(api));
+    }
+
+    loadUserPreferences() {
+        // Load preferences from localStorage
+        const savedPreferences = localStorage.getItem('user_preferences');
+        if (savedPreferences) {
+            try {
+                const preferences = JSON.parse(savedPreferences);
+                
+                // Apply API preference
+                if (preferences.api) {
+                    this.selectedApi = preferences.api;
+                    if (this.ui.apiSelect) {
+                        this.ui.apiSelect.value = preferences.api;
+                    }
+                }
+                
+                // Apply color preferences
+                if (preferences.color_closed) {
+                    this.ui.updateCardColor(preferences.color_closed);
+                    if (this.ui.colorPicker) {
+                        this.ui.colorPicker.value = preferences.color_closed;
+                    }
+                }
+                
+                if (preferences.color_found) {
+                    // Store matched color preference for use in board
+                    this.matchedColor = preferences.color_found;
+                }
+            } catch (error) {
+                console.error('Error loading preferences:', error);
+            }
+        }
     }
 
     async startGame() {
@@ -61,6 +97,14 @@ class MemoryGame {
         this.board?.updateAllTilesColor(color);
     }
 
+    handleApiChange(api) {
+        this.selectedApi = api;
+        if (this.gameStarted) {
+            this.resetGame();
+            this.startGame();
+        }
+    }
+
     async handleBoardSizeChange(newSize) {
         this.boardSize = newSize;
         await this.resetGame();
@@ -76,9 +120,9 @@ class MemoryGame {
         }
 
         const uniqueImagesNeeded = (this.boardSize * this.boardSize) / 2;
-        const imageUrls = await ImageService.fetchImages(uniqueImagesNeeded);
+        const imageUrls = await ImageService.fetchImages(uniqueImagesNeeded, this.selectedApi);
         
-        this.board.initialize(imageUrls);
+        this.board.initialize(imageUrls, this.matchedColor);
         
         this.flippedTiles = [];
         this.isProcessing = false;

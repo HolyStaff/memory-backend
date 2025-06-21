@@ -25,6 +25,15 @@
                     <option value="6">6x6</option>
                 </select>
             </div>
+            <div class="api-select-container">
+                <label for="api-select">Image Source:</label>
+                <select id="api-select" class="game-button">
+                    <option value="cats" selected>Cats</option>
+                    <option value="picsum">Random Photos</option>
+                    <option value="dogs">Dogs</option>
+                </select>
+            </div>
+            <button onclick="window.location.href='preferences.html'" class="game-button" style="background-color: #27ae60;">Preferences</button>
         </div>
         <div id="timer-container" class="timer-container">
             <span>Flip Timer: </span>
@@ -49,7 +58,6 @@
                     <span>Time</span>
                 </div>
                 <div class="leaderboard-entries">
-                    <!-- Entries will be added dynamically -->
                 </div>
             </div>
             <div class="leaderboard-list" id="leaderboard-6x6" style="display: none;">
@@ -59,7 +67,6 @@
                     <span>Time</span>
                 </div>
                 <div class="leaderboard-entries">
-                    <!-- Entries will be added dynamically -->
                 </div>
             </div>
         </div>

@@ -6,14 +6,16 @@ class Board {
         this.container = container;
         this.tiles = [];
         this.onTileClick = onTileClick;
+        this.matchedColor = '#2ecc71'; // Default matched color
     }
 
-    initialize(imageUrls) {
+    initialize(imageUrls, matchedColor = '#2ecc71') {
         if (!this.container) {
             console.error('Board container is null or undefined');
             return;
         }
 
+        this.matchedColor = matchedColor;
         this.container.innerHTML = '';
         this.tiles = [];
         console.log('Container cleared');
@@ -28,7 +30,7 @@ class Board {
         this.shuffleArray(pairs);
 
         for (let i = 0; i < this.size * this.size; i++) {
-            const tile = new Tile(i, pairs[i], this.onTileClick);
+            const tile = new Tile(i, pairs[i], this.onTileClick, this.matchedColor);
             this.tiles.push(tile);
             const tileElement = tile.createElement();
             this.container.appendChild(tileElement);
@@ -42,7 +44,6 @@ class Board {
             .getPropertyValue('--card-back-color').trim();
         this.updateAllTilesColor(initialColor);
     }
-
 
     updateAllTilesColor(color) {
         this.tiles.forEach(tile => tile.updateBackColor(color));

@@ -5,33 +5,37 @@
     <title>Preferences - Memory Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/preferences.css">
 </head>
 <body>
     <div class="preferences-container">
-        <h1>Preferences</h1>
-        <form id="preferences-form">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="image-api">Favorite Image API:</label>
-                <select id="image-api">
-                    <option value="cataas">Cat as a Service</option>
-                    <option value="placekitten">Place Kitten</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="matched-color">Matched Cards Color:</label>
-                <input type="color" id="matched-color">
-            </div>
-            <div class="form-group">
-                <label for="card-back-color">Card Back Color:</label>
-                <input type="color" id="card-back-color">
-            </div>
-            <button type="submit">Save Preferences</button>
-        </form>
-        <a href="index.html" class="back-link">Back to Game</a>
+        <div class="preferences-form-container">
+            <h1>Preferences</h1>
+            <form id="preferences-form">
+                <div class="preferences-form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="preferences-form-group">
+                    <label for="image-api">Favorite Image API:</label>
+                    <select id="image-api" class="preferences-select">
+                        <option value="cats">Cats</option>
+                        <option value="picsum">Random Photos</option>
+                        <option value="dogs">Dogs</option>
+                    </select>
+                </div>
+                <div class="preferences-form-group">
+                    <label for="matched-color">Matched Cards Color:</label>
+                    <input type="color" id="matched-color" class="preferences-color-picker">
+                </div>
+                <div class="preferences-form-group">
+                    <label for="card-back-color">Card Back Color:</label>
+                    <input type="color" id="card-back-color" class="preferences-color-picker">
+                </div>
+                <button type="submit" class="preferences-button primary">Save Preferences</button>
+            </form>
+            <button onclick="window.location.href='index.html'" class="preferences-button outline">Back to Game</button>
+        </div>
     </div>
     <script type="module" src="scripts/preferences.js"></script>
 </body>
