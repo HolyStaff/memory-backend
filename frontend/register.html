@@ -5,27 +5,28 @@
     <title>Register - Memory Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/register.css">
 </head>
 <body>
-<div class="game-container" style="justify-content: center;">
-    <div class="game" style="max-width: 400px; margin: 0 auto;">
+<div class="register-container">
+    <div class="register-form-container">
         <h1>Register</h1>
         <form id="register-form">
-            <div class="form-group">
+            <div class="register-form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" required>
             </div>
-            <div class="form-group">
+            <div class="register-form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" required>
             </div>
-            <div class="form-group">
+            <div class="register-form-group">
                 <label for="password">Password:</label>
                 <input type="password" id="password" required>
             </div>
-            <button type="submit" class="game-button" style="width: 100%; margin-bottom: 10px;">Register</button>
+            <button type="submit" class="register-button primary">Register</button>
         </form>
-        <button onclick="window.location.href='login.html'" class="game-button" style="width: 100%; background: #fff; color: #3498db; border: 1px solid #3498db;">Already have an account? Login</button>
+        <button onclick="window.location.href='login.html'" class="register-button outline">Already have an account? Login</button>
     </div>
 </div>
 <script type="module" src="scripts/auth.js"></script>

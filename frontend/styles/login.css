@@ -1,0 +1,109 @@
+/* Login page specific styling */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-form-container {
+    min-width: 400px;
+    max-width: 1200px;
+    width: 100%;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-form-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.login-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.login-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.login-form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.login-form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-bottom: 10px;
+}
+
+.login-button.primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.login-button.primary:hover {
+    background-color: #2980b9;
+}
+
+.login-button.secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.login-button.secondary:hover {
+    background-color: #7f8c8d;
+}
+
+.login-button.outline {
+    background-color: white;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.login-button.outline:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+/* Responsive design for login */
+@media (max-width: 480px) {
+    .login-form-container {
+        padding: 1.5rem;
+        margin: 10px;
+    }
+    
+    .login-form-group input {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .login-button {
+        padding: 10px;
+        font-size: 14px;
+    }
+} 
