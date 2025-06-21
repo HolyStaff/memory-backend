@@ -37,7 +37,6 @@ export class ImageService {
     static async fetchPicsumImages(count) {
         const images = [];
         for (let i = 0; i < count; i++) {
-            // Use random seed to get different images
             const seed = Math.floor(Math.random() * 1000);
             images.push(`https://picsum.photos/seed/${seed}/200/200`);
         }
@@ -50,21 +49,18 @@ export class ImageService {
             const usedBreeds = new Set();
             
             for (let i = 0; i < count; i++) {
-                // Get a random dog image
                 const response = await fetch('https://dog.ceo/api/breeds/image/random');
                 const data = await response.json();
                 
                 if (data.status === 'success') {
                     images.push(data.message);
                 } else {
-                    // Fallback to a specific breed if random fails
                     images.push('https://images.dog.ceo/breeds/retriever-golden/n02099601_1024.jpg');
                 }
             }
             return images;
         } catch (error) {
             console.error('Error fetching dog images:', error);
-            // Fallback to a specific dog image
             const fallbackImages = [];
             for (let i = 0; i < count; i++) {
                 fallbackImages.push('https://images.dog.ceo/breeds/retriever-golden/n02099601_1024.jpg');

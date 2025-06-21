@@ -20,7 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 if (data.token) {
                     localStorage.setItem('jwt_token', data.token);
-                    window.location.href = 'index.html';
+                    
+                    const successMessage = document.createElement('div');
+                    successMessage.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background-color: #27ae60;
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 5px;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                        z-index: 10000;
+                        font-family: Arial, sans-serif;
+                        max-width: 300px;
+                    `;
+                    successMessage.textContent = 'Succesvol ingelogd! Je wordt doorgestuurd naar het spel.';
+                    document.body.appendChild(successMessage);
+                    
+                    setTimeout(() => {
+                        if (successMessage.parentNode) {
+                            successMessage.parentNode.removeChild(successMessage);
+                        }
+                        window.location.href = 'index.html';
+                    }, 3000);
                 } else {
                     alert('Login failed: ' + (data.message || 'No token received'));
                 }
@@ -47,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Registration successful! Please log in.');
                     window.location.href = 'login.html';
                 } else {
-                    alert('Registration failed');
+                    const errorData = await response.json();
+                    alert('Registration failed: ' + (errorData.message || 'Unknown error'));
                 }
             } catch (err) {
                 alert('Registration failed: ' + err.message);

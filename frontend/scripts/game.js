@@ -24,6 +24,7 @@ class MemoryGame {
 
         this.setupEventListeners();
         this.loadUserPreferences();
+        this.checkAuthenticationStatus();
     }
 
     setupEventListeners() {
@@ -32,6 +33,48 @@ class MemoryGame {
         this.ui.onColorChange((color) => this.changeCardColor(color));
         this.ui.onBoardSizeChange((newSize) => this.handleBoardSizeChange(newSize));
         this.ui.onApiChange((api) => this.handleApiChange(api));
+    }
+
+    checkAuthenticationStatus() {
+        const token = localStorage.getItem('jwt_token');
+        if (token && window.JWTUtils) {
+            const expiration = window.JWTUtils.getTokenExpiration(token);
+            if (expiration) {
+                const timeUntilExpiration = expiration.getTime() - Date.now();
+                const minutesUntilExpiration = Math.floor(timeUntilExpiration / (1000 * 60));
+                
+                // Show warning if token expires in less than 10 minutes
+                if (minutesUntilExpiration <= 10 && minutesUntilExpiration > 0) {
+                    this.showSessionWarning(minutesUntilExpiration);
+                }
+            }
+        }
+    }
+
+    showSessionWarning(minutesLeft) {
+        const warning = document.createElement('div');
+        warning.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #f39c12;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+            max-width: 300px;
+        `;
+        warning.textContent = `Je sessie verloopt over ${minutesLeft} minuten. Log opnieuw in om door te spelen.`;
+        document.body.appendChild(warning);
+        
+        // Remove warning after 5 seconds
+        setTimeout(() => {
+            if (warning.parentNode) {
+                warning.parentNode.removeChild(warning);
+            }
+        }, 5000);
     }
 
     loadUserPreferences() {
