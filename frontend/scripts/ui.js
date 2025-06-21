@@ -9,7 +9,10 @@ export class GameUI {
         this.colorPicker = document.getElementById('card-color');
         this.boardSizeSelect = document.getElementById('board-size');
         this.apiSelect = document.getElementById('api-select');
-        this.flipTimerElement = document.getElementById('flip-timer');
+        this.gameTimerElement = document.getElementById('game-timer');
+        this.flipTimerContainer = document.getElementById('flip-timer-container');
+        this.flipTimerText = document.getElementById('flip-timer-text');
+        this.flipProgressBar = document.getElementById('flip-progress-bar');
 
         this.initializeApiSelect();
     }
@@ -51,9 +54,43 @@ export class GameUI {
         this.resetButton.disabled = !enabled;
     }
 
-    updateFlipTimer(seconds) {
-        if (this.flipTimerElement) {
-            this.flipTimerElement.textContent = seconds.toFixed(1);
+    updateGameTimer(seconds) {
+        if (this.gameTimerElement) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            this.gameTimerElement.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+    }
+
+    showFlipTimer() {
+        if (this.flipTimerContainer) {
+            this.flipTimerContainer.style.display = 'block';
+        }
+    }
+
+    hideFlipTimer() {
+        if (this.flipTimerContainer) {
+            this.flipTimerContainer.style.display = 'none';
+        }
+    }
+
+    updateFlipTimer(progress) {
+        if (this.flipProgressBar) {
+            const percentage = progress * 100;
+            this.flipProgressBar.style.width = `${percentage}%`;
+            
+            // Update color based on progress
+            this.flipProgressBar.classList.remove('warning', 'danger');
+            if (progress > 0.7) {
+                this.flipProgressBar.classList.add('danger');
+            } else if (progress > 0.5) {
+                this.flipProgressBar.classList.add('warning');
+            }
+        }
+        
+        if (this.flipTimerText) {
+            const remainingTime = Math.max(0, 2.0 - (progress * 2.0));
+            this.flipTimerText.textContent = `${remainingTime.toFixed(1)}s`;
         }
     }
 

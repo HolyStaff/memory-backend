@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             successMessage.parentNode.removeChild(successMessage);
                         }
                         window.location.href = 'index.html';
-                    }, 3000);
+                    }, 1500);
                 } else {
                     alert('Login failed: ' + (data.message || 'No token received'));
                 }

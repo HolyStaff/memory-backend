@@ -1,6 +1,6 @@
 import Board from './board.js';
 import { GameUI } from './ui.js';
-import { FlipTimer } from './timer.js';
+import { GameTimer, FlipTimer } from './timer.js';
 import { ImageService } from './imageService.js';
 import { Leaderboard } from './leaderboard.js';
 
@@ -9,7 +9,11 @@ class MemoryGame {
         this.boardSize = boardSize;
         this.container = document.getElementById('grid-container');
         this.ui = new GameUI();
-        this.timer = new FlipTimer((time) => this.ui.updateFlipTimer(time));
+        this.gameTimer = new GameTimer((time) => this.ui.updateGameTimer(time));
+        this.flipTimer = new FlipTimer(
+            (progress) => this.ui.updateFlipTimer(progress),
+            () => this.handleFlipTimerComplete()
+        );
         this.leaderboard = new Leaderboard();
         
         this.flippedTiles = [];
@@ -117,6 +121,9 @@ class MemoryGame {
         this.ui.setStartButtonEnabled(false);
         this.ui.setResetButtonEnabled(true);
 
+        // Start the game timer
+        this.gameTimer.start();
+
         await this.initialize();
     }
 
@@ -126,7 +133,11 @@ class MemoryGame {
         this.isProcessing = false;
         this.moveCount = 0;
         this.matchCount = 0;
-        this.timer.reset();
+        
+        // Reset timers
+        this.gameTimer.reset();
+        this.flipTimer.reset();
+        this.ui.hideFlipTimer();
 
         this.board = new Board(this.boardSize, this.container, this.handleTileClick.bind(this));
 
@@ -182,17 +193,20 @@ class MemoryGame {
         this.flippedTiles.push(tile);
 
         if (this.flippedTiles.length === 1) {
-            this.timer.start();
+            // First tile flipped - show timer but don't start it yet
+            this.ui.showFlipTimer();
+            this.flipTimer.reset();
         }
 
         if (this.flippedTiles.length === 2) {
             this.moveCount++;
             this.isProcessing = true;
 
-            setTimeout(() => {
-                const [tile1, tile2] = this.flippedTiles;
+            const [tile1, tile2] = this.flippedTiles;
 
-                if (tile1.imageUrl === tile2.imageUrl) {
+            if (tile1.imageUrl === tile2.imageUrl) {
+                // Match found - hide tiles after a short delay
+                setTimeout(() => {
                     tile1.match();
                     tile2.match();
                     this.matchCount++;
@@ -200,27 +214,56 @@ class MemoryGame {
                     if (this.board.allTilesMatched()) {
                         this.gameComplete();
                     }
-                } else {
-                    tile1.hide();
-                    tile2.hide();
-                }
 
-                this.flippedTiles = [];
-                this.isProcessing = false;
-                this.timer.reset();
-            }, this.flipDuration);
+                    this.flippedTiles = [];
+                    this.isProcessing = false;
+                    this.flipTimer.reset();
+                }, 500); // Short delay to show the match
+            } else {
+                // No match - start the flip timer
+                this.flipTimer.start();
+            }
+        }
+    }
+
+    handleFlipTimerComplete() {
+        // Flip timer completed - hide the non-matching tiles
+        if (this.flippedTiles.length === 2) {
+            const [tile1, tile2] = this.flippedTiles;
+            tile1.hide();
+            tile2.hide();
+            
+            this.flippedTiles = [];
+            this.isProcessing = false;
+            this.flipTimer.reset();
         }
     }
 
     gameComplete() {
-        const time = this.timer.time;
-        this.leaderboard.addEntry(this.boardSize, this.moveCount, time);
+        // Stop the game timer
+        this.gameTimer.stop();
+        const time = this.gameTimer.getTime();
+        
+        // Get current color preferences
+        const colorFound = this.matchedColor || '#2ecc71';
+        const colorClosed = getComputedStyle(document.documentElement)
+            .getPropertyValue('--card-back-color').trim() || '#3498db';
+        
+        // Save to leaderboard with all relevant information
+        this.leaderboard.addEntry(
+            this.boardSize, 
+            this.moveCount, 
+            time, 
+            this.selectedApi, 
+            colorFound, 
+            colorClosed
+        );
         
         const topScore = this.leaderboard.getTopScore(this.boardSize);
-        let message = `you completed the game in ${this.moveCount} moves`;
+        let message = `Je hebt het spel voltooid in ${this.moveCount} zetten in ${this.gameTimer.formatTime(time)}`;
         
         if (topScore && topScore.moves === this.moveCount) {
-            message += "\nnew high score!";
+            message += "\nNieuwe high score!";
         }
         
         alert(message);
