@@ -1,142 +1,88 @@
 export class GameTimer {
-    constructor() {
-        this.startTime = null;
-        this.isRunning = false;
+    constructor(onUpdate) {
+        this.time = 0;
         this.interval = null;
-        
-        this.timeDisplay = document.getElementById('game-timer-display');
+        this.onUpdate = onUpdate;
+        this.isRunning = false;
     }
 
     start() {
         if (this.isRunning) return;
         
-        this.startTime = Date.now();
         this.isRunning = true;
-        
         this.interval = setInterval(() => {
-            this.updateDisplay();
-        }, 1000);
-        
-        this.updateDisplay();
+            this.time += 0.1;
+            this.onUpdate(this.time);
+        }, 100);
     }
 
     stop() {
-        this.isRunning = false;
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
         }
+        this.isRunning = false;
     }
 
     reset() {
         this.stop();
-        this.startTime = null;
-        this.updateDisplay();
+        this.time = 0;
+        this.onUpdate(this.time);
     }
 
-    getElapsedTime() {
-        if (!this.startTime) return 0;
-        return Date.now() - this.startTime;
+    getTime() {
+        return this.time;
     }
 
-    updateDisplay() {
-        // Re-find the element in case it wasn't available during construction
-        if (!this.timeDisplay) {
-            this.timeDisplay = document.getElementById('game-timer-display');
-        }
-        
-        if (this.timeDisplay) {
-            const elapsed = this.getElapsedTime();
-            const minutes = Math.floor(elapsed / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
-            this.timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
+    formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 }
 
 export class FlipTimer {
-    constructor(duration = 3000) {
-        this.duration = duration;
-        this.timeLeft = duration;
-        this.isRunning = false;
+    constructor(onUpdate, onComplete) {
+        this.duration = 2.0; // 2 seconds for tile flip
+        this.time = 0;
         this.interval = null;
-        this.onComplete = null;
-        
-        this.progressBar = document.getElementById('flip-timer-progress');
-        this.timeDisplay = document.getElementById('flip-timer-display');
-        this.container = document.getElementById('flip-timer-container');
-        
-        // Always show the timer container
-        if (this.container) {
-            this.container.style.display = 'flex';
-        }
+        this.onUpdate = onUpdate;
+        this.onComplete = onComplete;
+        this.isRunning = false;
     }
 
     start() {
-        if (this.isRunning) return;
-        
+        this.reset();
         this.isRunning = true;
-        this.timeLeft = this.duration;
-        
         this.interval = setInterval(() => {
-            this.timeLeft -= 100;
+            this.time += 0.1;
+            const progress = Math.min(this.time / this.duration, 1.0);
+            this.onUpdate(progress);
             
-            if (this.timeLeft <= 0) {
+            if (this.time >= this.duration) {
                 this.stop();
                 if (this.onComplete) {
                     this.onComplete();
                 }
-            } else {
-                this.updateDisplay();
             }
         }, 100);
-        
-        this.updateDisplay();
     }
 
     stop() {
-        this.isRunning = false;
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
         }
+        this.isRunning = false;
     }
 
     reset() {
         this.stop();
-        this.timeLeft = this.duration;
-        this.updateDisplay();
+        this.time = 0;
+        this.onUpdate(0);
     }
 
-    updateDisplay() {
-        // Re-find elements in case they weren't available during construction
-        if (!this.progressBar) {
-            this.progressBar = document.getElementById('flip-timer-progress');
-        }
-        if (!this.timeDisplay) {
-            this.timeDisplay = document.getElementById('flip-timer-display');
-        }
-        if (!this.container) {
-            this.container = document.getElementById('flip-timer-container');
-        }
-        
-        if (this.progressBar) {
-            const progress = (this.timeLeft / this.duration) * 100;
-            this.progressBar.style.width = `${progress}%`;
-            
-            // Change color based on time left
-            if (progress > 60) {
-                this.progressBar.style.backgroundColor = '#4CAF50'; // Green
-            } else if (progress > 30) {
-                this.progressBar.style.backgroundColor = '#FF9800'; // Orange
-            } else {
-                this.progressBar.style.backgroundColor = '#F44336'; // Red
-            }
-        }
-        
-        if (this.timeDisplay) {
-            const seconds = Math.ceil(this.timeLeft / 1000);
-            this.timeDisplay.textContent = `${seconds}s`;
-        }
+    isActive() {
+        return this.isRunning;
     }
 } 

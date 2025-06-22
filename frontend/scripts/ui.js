@@ -9,6 +9,10 @@ export class GameUI {
         this.colorPicker = document.getElementById('card-color');
         this.boardSizeSelect = document.getElementById('board-size');
         this.apiSelect = document.getElementById('api-select');
+        this.gameTimerElement = document.getElementById('game-timer');
+        this.flipTimerContainer = document.getElementById('flip-timer-container');
+        this.flipTimerText = document.getElementById('flip-timer-text');
+        this.flipProgressBar = document.getElementById('flip-progress-bar');
 
         this.initializeApiSelect();
     }
@@ -50,53 +54,43 @@ export class GameUI {
         this.resetButton.disabled = !enabled;
     }
 
-    showGameTimer() {
-        const gameTimerContainer = document.getElementById('game-timer-container');
-        if (gameTimerContainer) {
-            gameTimerContainer.style.display = 'flex';
-        }
-    }
-
-    hideGameTimer() {
-        const gameTimerContainer = document.getElementById('game-timer-container');
-        if (gameTimerContainer) {
-            gameTimerContainer.style.display = 'none';
+    updateGameTimer(seconds) {
+        if (this.gameTimerElement) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            this.gameTimerElement.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
         }
     }
 
     showFlipTimer() {
-        const flipTimerContainer = document.getElementById('flip-timer-container');
-        if (flipTimerContainer) {
-            flipTimerContainer.style.display = 'flex';
+        if (this.flipTimerContainer) {
+            this.flipTimerContainer.style.display = 'block';
         }
     }
 
     hideFlipTimer() {
-        // Don't hide the timer anymore - just reset it
-        const flipTimer = document.getElementById('flip-timer');
-        if (flipTimer) {
-            flipTimer.reset();
+        if (this.flipTimerContainer) {
+            this.flipTimerContainer.style.display = 'none';
         }
     }
 
-    showGameControls() {
-        const gameControls = document.getElementById('game-controls');
-        if (gameControls) {
-            gameControls.style.display = 'flex';
+    updateFlipTimer(progress) {
+        if (this.flipProgressBar) {
+            const percentage = progress * 100;
+            this.flipProgressBar.style.width = `${percentage}%`;
+            
+            // Update color based on progress
+            this.flipProgressBar.classList.remove('warning', 'danger');
+            if (progress > 0.7) {
+                this.flipProgressBar.classList.add('danger');
+            } else if (progress > 0.5) {
+                this.flipProgressBar.classList.add('warning');
+            }
         }
-    }
-
-    hideStartButton() {
-        const startButton = document.getElementById('start-button');
-        if (startButton) {
-            startButton.style.display = 'none';
-        }
-    }
-
-    showStartButton() {
-        const startButton = document.getElementById('start-button');
-        if (startButton) {
-            startButton.style.display = '';
+        
+        if (this.flipTimerText) {
+            const remainingTime = Math.max(0, 2.0 - (progress * 2.0));
+            this.flipTimerText.textContent = `${remainingTime.toFixed(1)}s`;
         }
     }
 

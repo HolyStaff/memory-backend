@@ -9,6 +9,11 @@ class MemoryGame {
         this.boardSize = boardSize;
         this.container = document.getElementById('grid-container');
         this.ui = new GameUI();
+        this.gameTimer = new GameTimer((time) => this.ui.updateGameTimer(time));
+        this.flipTimer = new FlipTimer(
+            (progress) => this.ui.updateFlipTimer(progress),
+            () => this.handleFlipTimerComplete()
+        );
         this.leaderboard = new Leaderboard();
         
         this.flippedTiles = [];
@@ -24,13 +29,6 @@ class MemoryGame {
         this.setupEventListeners();
         this.loadUserPreferences();
         this.checkAuthenticationStatus();
-        this.initializeTimers();
-    }
-
-    initializeTimers() {
-        this.gameTimer = new GameTimer();
-        this.flipTimer = new FlipTimer(3000); // 3 seconds for tile flip
-        this.flipTimer.onComplete = () => this.handleFlipTimerComplete();
     }
 
     setupEventListeners() {
@@ -48,7 +46,8 @@ class MemoryGame {
             if (expiration) {
                 const timeUntilExpiration = expiration.getTime() - Date.now();
                 const minutesUntilExpiration = Math.floor(timeUntilExpiration / (1000 * 60));
-
+                
+                // Show warning if token expires in less than 10 minutes
                 if (minutesUntilExpiration <= 10 && minutesUntilExpiration > 0) {
                     this.showSessionWarning(minutesUntilExpiration);
                 }
@@ -73,7 +72,8 @@ class MemoryGame {
         `;
         warning.textContent = `Je sessie verloopt over ${minutesLeft} minuten. Log opnieuw in om door te spelen.`;
         document.body.appendChild(warning);
-
+        
+        // Remove warning after 5 seconds
         setTimeout(() => {
             if (warning.parentNode) {
                 warning.parentNode.removeChild(warning);
@@ -82,18 +82,21 @@ class MemoryGame {
     }
 
     loadUserPreferences() {
+        // Load preferences from localStorage
         const savedPreferences = localStorage.getItem('user_preferences');
         if (savedPreferences) {
             try {
                 const preferences = JSON.parse(savedPreferences);
-
+                
+                // Apply API preference
                 if (preferences.api) {
                     this.selectedApi = preferences.api;
                     if (this.ui.apiSelect) {
                         this.ui.apiSelect.value = preferences.api;
                     }
                 }
-
+                
+                // Apply color preferences
                 if (preferences.color_closed) {
                     this.ui.updateCardColor(preferences.color_closed);
                     if (this.ui.colorPicker) {
@@ -102,6 +105,7 @@ class MemoryGame {
                 }
                 
                 if (preferences.color_found) {
+                    // Store matched color preference for use in board
                     this.matchedColor = preferences.color_found;
                 }
             } catch (error) {
@@ -114,11 +118,11 @@ class MemoryGame {
         if (this.gameStarted) return;
 
         this.gameStarted = true;
-        this.gameTimer.start();
-        this.ui.showGameTimer();
-        this.ui.hideStartButton();
-        this.ui.showGameControls();
+        this.ui.setStartButtonEnabled(false);
         this.ui.setResetButtonEnabled(true);
+
+        // Start the game timer
+        this.gameTimer.start();
 
         await this.initialize();
     }
@@ -133,15 +137,12 @@ class MemoryGame {
         // Reset timers
         this.gameTimer.reset();
         this.flipTimer.reset();
-
-        this.gameTimer.updateDisplay();
-        this.flipTimer.updateDisplay();
+        this.ui.hideFlipTimer();
 
         this.board = new Board(this.boardSize, this.container, this.handleTileClick.bind(this));
 
         this.ui.setStartButtonEnabled(true);
         this.ui.setResetButtonEnabled(false);
-        this.ui.showStartButton();
         this.gameStarted = false;
     }
 
@@ -192,6 +193,7 @@ class MemoryGame {
         this.flippedTiles.push(tile);
 
         if (this.flippedTiles.length === 1) {
+            // First tile flipped - show timer but don't start it yet
             this.ui.showFlipTimer();
             this.flipTimer.reset();
         }
@@ -203,6 +205,7 @@ class MemoryGame {
             const [tile1, tile2] = this.flippedTiles;
 
             if (tile1.imageUrl === tile2.imageUrl) {
+                // Match found - hide tiles after a short delay
                 setTimeout(() => {
                     tile1.match();
                     tile2.match();
@@ -215,14 +218,16 @@ class MemoryGame {
                     this.flippedTiles = [];
                     this.isProcessing = false;
                     this.flipTimer.reset();
-                }, 500);
+                }, 500); // Short delay to show the match
             } else {
+                // No match - start the flip timer
                 this.flipTimer.start();
             }
         }
     }
 
     handleFlipTimerComplete() {
+        // Flip timer completed - hide the non-matching tiles
         if (this.flippedTiles.length === 2) {
             const [tile1, tile2] = this.flippedTiles;
             tile1.hide();
@@ -235,13 +240,16 @@ class MemoryGame {
     }
 
     gameComplete() {
+        // Stop the game timer
         this.gameTimer.stop();
         const time = this.gameTimer.getTime();
-
+        
+        // Get current color preferences
         const colorFound = this.matchedColor || '#2ecc71';
         const colorClosed = getComputedStyle(document.documentElement)
             .getPropertyValue('--card-back-color').trim() || '#3498db';
-
+        
+        // Save to leaderboard with all relevant information
         this.leaderboard.addEntry(
             this.boardSize, 
             this.moveCount, 
