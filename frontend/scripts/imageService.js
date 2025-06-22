@@ -26,32 +26,39 @@ export class ImageService {
     }
 
     static async fetchCatImages(count) {
-        const images = [];
-        for (let i = 0; i < count; i++) {
-            const timestamp = new Date().getTime() + i;
-            images.push(`https://cataas.com/cat?type=square&t=${timestamp}`);
+        try {
+            const images = [];
+            for (let i = 0; i < count; i++) {
+                const timestamp = new Date().getTime() + i;
+                images.push(`https://cataas.com/cat?type=square&t=${timestamp}`);
+            }
+            return images;
+        } catch (error) {
+            console.error('Error fetching cat images:', error);
+            return this.getFallbackImages(count);
         }
-        return images;
     }
 
     static async fetchPicsumImages(count) {
-        const images = [];
-        for (let i = 0; i < count; i++) {
-            const seed = Math.floor(Math.random() * 1000);
-            images.push(`https://picsum.photos/seed/${seed}/200/200`);
+        try {
+            const images = [];
+            for (let i = 0; i < count; i++) {
+                const seed = Math.floor(Math.random() * 1000);
+                images.push(`https://picsum.photos/seed/${seed}/200/200`);
+            }
+            return images;
+        } catch (error) {
+            console.error('Error fetching picsum images:', error);
+            return this.getFallbackImages(count);
         }
-        return images;
     }
 
     static async fetchDogImages(count) {
         try {
             const images = [];
-            const usedBreeds = new Set();
-            
             for (let i = 0; i < count; i++) {
                 const response = await fetch('https://dog.ceo/api/breeds/image/random');
                 const data = await response.json();
-                
                 if (data.status === 'success') {
                     images.push(data.message);
                 } else {
@@ -61,20 +68,29 @@ export class ImageService {
             return images;
         } catch (error) {
             console.error('Error fetching dog images:', error);
-            const fallbackImages = [];
-            for (let i = 0; i < count; i++) {
-                fallbackImages.push('https://images.dog.ceo/breeds/retriever-golden/n02099601_1024.jpg');
-            }
-            return fallbackImages;
+            return this.getFallbackImages(count);
         }
     }
 
     static getFallbackImages(count) {
-        const fallbackImages = [];
+
+        const emojis = [
+            '🐱', '🐶', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷',
+            '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆', '🦉', '🦄', '🐝',
+            '🐛', '🦋', '🐌', '🐞', '🐢', '🐍', '🦖', '🦕', '🐙', '🦑',
+            '🦞', '🦀', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅',
+            '🐆', '🦓', '🦍', '🦧', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒',
+            '🦘', '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙',
+            '🐐', '🦌', '🐕', '🐩', '🦮', '🐕‍🦺', '🐈', '🐓', '🦃', '🦚',
+            '🦜', '🦢', '🦩', '🕊', '🐇', '🦝', '🦨', '🦡', '🦦', '🦥',
+            '🐁', '🐀', '🐿', '🦔'
+        ];
+        const fallbackEmojis = [];
         for (let i = 0; i < count; i++) {
-            fallbackImages.push(`https://placekitten.com/${200 + i}/${200 + i}`);
+            const randomIndex = Math.floor(Math.random() * emojis.length);
+            fallbackEmojis.push(emojis[randomIndex]);
         }
-        return fallbackImages;
+        return fallbackEmojis;
     }
 
     static getApiDisplayNames() {

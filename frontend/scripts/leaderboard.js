@@ -1,27 +1,7 @@
 export class Leaderboard {
     constructor() {
-        this.entries = {
-            4: [], // 4x4
-            6: []  // 6x6
-        };
-        this.setupTabs();
+        this.entries = [];
         this.loadTopScores();
-    }
-
-    setupTabs() {
-        const tabs = document.querySelectorAll('.tab-button');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                const size = tab.dataset.size;
-                document.querySelectorAll('.leaderboard-list').forEach(list => {
-                    list.style.display = 'none';
-                });
-                document.getElementById(`leaderboard-${size}x${size}`).style.display = 'block';
-            });
-        });
     }
 
     async loadTopScores() {
@@ -41,35 +21,25 @@ export class Leaderboard {
     }
 
     processBackendScores(scores) {
-        // Process backend scores and display them
-        // For now, we'll show the top 5 scores from the backend
-        const topScores = scores.slice(0, 5);
-        
-        // Update both 4x4 and 6x6 leaderboards with the same data
-        // In a real implementation, you might want separate endpoints for different board sizes
-        this.entries[4] = topScores.map((score, index) => ({
+        // Show top 5 scores globally
+        const topScores = scores
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5);
+        this.entries = topScores.map((score, index) => ({
             rank: index + 1,
             username: score.username,
             score: score.score,
-            moves: Math.floor(score.score / 10), // Convert score to moves (approximation)
-            time: (score.score % 10) * 10 // Convert score to time (approximation)
+            moves: score.moves,
+            time: score.time,
+            boardSize: score.boardSize
         }));
-
-        this.entries[6] = [...this.entries[4]]; // Use same data for 6x6 for now
-
-        this.updateDisplay(4);
-        this.updateDisplay(6);
+        this.updateDisplay();
     }
 
     showLoadingError() {
-        const entriesContainer4 = document.querySelector('#leaderboard-4x4 .leaderboard-entries');
-        const entriesContainer6 = document.querySelector('#leaderboard-6x6 .leaderboard-entries');
-        
-        if (entriesContainer4) {
-            entriesContainer4.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Kon top scores niet laden</div>';
-        }
-        if (entriesContainer6) {
-            entriesContainer6.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Kon top scores niet laden</div>';
+        const entriesContainer = document.querySelector('.leaderboard-entries');
+        if (entriesContainer) {
+            entriesContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Kon top scores niet laden</div>';
         }
     }
 
@@ -79,23 +49,23 @@ export class Leaderboard {
             console.log('No token found, skipping game save');
             return;
         }
-
         try {
-            // Decode token to get user ID
             const decoded = this.decodeToken(token);
             if (!decoded || !decoded.sub) {
                 console.error('Invalid token, cannot save game');
                 return;
             }
-
+            const score = this.calculateScore(boardSize, moves, time);
             const gameData = {
                 id: decoded.sub,
-                score: moves * 10 + (time / 10), // Combine moves and time into a single score
+                score,
+                moves,
+                time,
+                boardSize,
                 api: api || 'cats',
                 color_found: colorFound || '#2ecc71',
                 color_closed: colorClosed || '#3498db'
             };
-
             const response = await fetch('http://localhost:8000/game/save', {
                 method: 'POST',
                 headers: {
@@ -104,10 +74,8 @@ export class Leaderboard {
                 },
                 body: JSON.stringify(gameData)
             });
-
             if (response.ok) {
                 console.log('Game saved successfully');
-                // Reload top scores after saving
                 await this.loadTopScores();
             } else {
                 console.error('Failed to save game');
@@ -115,6 +83,52 @@ export class Leaderboard {
         } catch (error) {
             console.error('Error saving game:', error);
         }
+    }
+
+    calculateScore(boardSize, moves, time) {
+        // Lower moves and lower time = higher score
+        // Example: score = (10000 / (moves * time)) * multiplier
+        // 6x6 gets 1.2x multiplier
+        if (moves === 0 || time === 0) return 0;
+        let base = 10000 / (moves * time);
+        if (boardSize === 6) base *= 1.2;
+        return Math.round(base * 100) / 100;
+    }
+
+    addEntry(boardSize, moves, time, api = 'cats', colorFound = '#2ecc71', colorClosed = '#3498db') {
+        // Save game to backend
+        this.saveGameToBackend(boardSize, moves, time, api, colorFound, colorClosed);
+        // Local entry for immediate display
+        const score = this.calculateScore(boardSize, moves, time);
+        const entry = { moves, time, score, boardSize, date: new Date() };
+        this.entries.push(entry);
+        this.entries.sort((a, b) => b.score - a.score);
+        this.entries = this.entries.slice(0, 5);
+        this.updateDisplay();
+    }
+
+    updateDisplay() {
+        const entriesContainer = document.querySelector('.leaderboard-entries');
+        if (!entriesContainer) return;
+        entriesContainer.innerHTML = '';
+        if (this.entries.length === 0) {
+            entriesContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Geen scores beschikbaar</div>';
+            return;
+        }
+        this.entries.forEach((entry, index) => {
+            const entryElement = document.createElement('div');
+            entryElement.className = 'leaderboard-entry';
+            entryElement.innerHTML = `
+                <span>#${index + 1}</span>
+                <span>${entry.username || 'Local'}</span>
+                <span>${entry.score}</span>
+            `;
+            entriesContainer.appendChild(entryElement);
+        });
+    }
+
+    getTopScore() {
+        return this.entries[0] || null;
     }
 
     decodeToken(token) {
@@ -129,56 +143,5 @@ export class Leaderboard {
             console.error('Error decoding JWT token:', error);
             return null;
         }
-    }
-
-    addEntry(boardSize, moves, time, api = 'cats', colorFound = '#2ecc71', colorClosed = '#3498db') {
-        // Save game to backend
-        this.saveGameToBackend(boardSize, moves, time, api, colorFound, colorClosed);
-        
-        // Also keep local entry for immediate display
-        const entry = { moves, time, date: new Date() };
-        this.entries[boardSize].push(entry);
-        this.entries[boardSize].sort((a, b) => a.moves - b.moves);
-        this.entries[boardSize] = this.entries[boardSize].slice(0, 5); // Keep top 5
-        this.updateDisplay(boardSize);
-    }
-
-    updateDisplay(boardSize) {
-        const entriesContainer = document.querySelector(`#leaderboard-${boardSize}x${boardSize} .leaderboard-entries`);
-        if (!entriesContainer) return;
-
-        entriesContainer.innerHTML = '';
-
-        if (this.entries[boardSize].length === 0) {
-            entriesContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Geen scores beschikbaar</div>';
-            return;
-        }
-
-        this.entries[boardSize].forEach((entry, index) => {
-            const entryElement = document.createElement('div');
-            entryElement.className = 'leaderboard-entry';
-            
-            if (entry.username) {
-                // Backend score format
-                entryElement.innerHTML = `
-                    <span>#${entry.rank}</span>
-                    <span>${entry.username}</span>
-                    <span>${entry.moves}</span>
-                `;
-            } else {
-                // Local score format
-                entryElement.innerHTML = `
-                    <span>#${index + 1}</span>
-                    <span>Local</span>
-                    <span>${entry.moves}</span>
-                `;
-            }
-            
-            entriesContainer.appendChild(entryElement);
-        });
-    }
-
-    getTopScore(boardSize) {
-        return this.entries[boardSize][0] || null;
     }
 } 

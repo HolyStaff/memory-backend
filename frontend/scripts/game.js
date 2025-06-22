@@ -259,7 +259,7 @@ class MemoryGame {
             colorClosed
         );
         
-        const topScore = this.leaderboard.getTopScore(this.boardSize);
+        const topScore = this.leaderboard.getTopScore();
         let message = `Je hebt het spel voltooid in ${this.moveCount} zetten in ${this.gameTimer.formatTime(time)}`;
         
         if (topScore && topScore.moves === this.moveCount) {
