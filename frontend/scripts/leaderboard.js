@@ -163,14 +163,14 @@ export class Leaderboard {
                 entryElement.innerHTML = `
                     <span>#${entry.rank}</span>
                     <span>${entry.username}</span>
-                    <span>${entry.score.toFixed(1)}</span>
+                    <span>${entry.moves}</span>
                 `;
             } else {
                 // Local score format
                 entryElement.innerHTML = `
                     <span>#${index + 1}</span>
+                    <span>Local</span>
                     <span>${entry.moves}</span>
-                    <span>${entry.time.toFixed(1)}s</span>
                 `;
             }
             

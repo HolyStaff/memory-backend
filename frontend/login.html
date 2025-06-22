@@ -32,6 +32,7 @@
 <script type="module" src="scripts/auth.js"></script>
 <script>
     document.getElementById('guest-btn').onclick = function() {
+        localStorage.setItem('guest', 'true');
         localStorage.removeItem('jwt_token');
         window.location.href = 'index.html';
     };

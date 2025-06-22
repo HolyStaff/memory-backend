@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
+<script>
+  const token = localStorage.getItem('jwt_token');
+  if (!token && localStorage.getItem('guest') !== 'true') {
+    window.location.href = 'login.html';
+  }
+</script>
 <h1>Memory</h1>
 <div class="game-container">
     <div class="game">
